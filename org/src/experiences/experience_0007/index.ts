@@ -76,6 +76,13 @@ export const experience = new Elysia({
       return false;
     }
   })
+  .get("/key", async () => {
+    const prices = await stripe.prices.list({
+      lookup_keys: ["gold"],
+      limit: 1,
+    });
+    return prices;
+  })
   .get("/list", async () => {
     const products = await stripe.products.list({
       active: true,
@@ -90,6 +97,43 @@ export const experience = new Elysia({
       },
     });
     return product;
+  })
+  .patch("/key", async () => {
+    const product = await stripe.products.retrieve("product-1");
+    if (product.default_price) {
+      const price = await stripe.prices.update(product.default_price, {
+        lookup_key: "gold",
+      });
+      return price;
+    }
+    return false;
+  })
+  .patch("/price", async () => {
+    const product = await stripe.products.retrieve("product-1");
+    const oldPriceId = product.default_price;
+    if (product.default_price) {
+      // Create a new price and transfert the key
+      const price = await stripe.prices.create({
+        currency: "eur",
+        unit_amount_decimal: 1012,
+        recurring: {
+          interval: "month",
+        },
+        product: "product-1",
+        lookup_key: "gold",
+        transfer_lookup_key: true,
+      });
+      // Change the default price
+      await stripe.products.update("product-1", {
+        default_price: price.id,
+      });
+      // Desactivate the previous price
+      await stripe.prices.update(oldPriceId, {
+        active: false,
+      });
+      return price;
+    }
+    return false;
   })
   .delete("/", async () => {
     // Impossible to delete without passing through the stripe website, just archive it

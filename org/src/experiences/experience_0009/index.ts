@@ -60,6 +60,19 @@ export const experience = new Elysia({
     });
 
     return promotionCode;
+  })
+  .delete("/", async () => {
+    const { data: promotionCodes } = await stripe.promotionCodes.list({});
+    const promises = [];
+    for (const promotionCode of promotionCodes) {
+      promises.push(
+        await stripe.promotionCodes.update(promotionCode.id, {
+          active: false,
+        })
+      );
+    }
+    const result = await Promise.all(promises);
+    return result;
   });
 
 export default experience;

@@ -58,6 +58,129 @@ export const experience = new Elysia({
     });
     return subscription;
   })
+  .post("/schedule", async () => {
+    const { data: customers } = await stripe.customers.search({
+      query: `email:'kevin.experience0014@example.com'`,
+    });
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customers[0].id,
+    });
+
+    const price3 = await stripe.prices.create({
+      currency: "usd",
+      unit_amount: 123456,
+      recurring: {
+        interval: "month",
+      },
+      product_data: {
+        name: "Gold Plan",
+      },
+    });
+
+    const subscriptionSchedule = await stripe.subscriptionSchedules.create({
+      customer: customers[0].id,
+      start_date: "now",
+      end_behavior: "release",
+      phases: [
+        {
+          items: [
+            {
+              price: price3.id,
+              quantity: 5,
+            },
+          ],
+          iterations: 12,
+        },
+      ],
+    });
+    return subscriptionSchedule;
+  })
+  .post("/schedule/futur", async () => {
+    const { data: customers } = await stripe.customers.search({
+      query: `email:'kevin.experience0014@example.com'`,
+    });
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customers[0].id,
+    });
+
+    const price3 = await stripe.prices.create({
+      currency: "usd",
+      unit_amount: 32145,
+      recurring: {
+        interval: "month",
+      },
+      product_data: {
+        name: "Gold Plan",
+      },
+    });
+
+    const now = Date.now();
+    const start_date = new Date(now + 24 * 60 * 60 * 1000);
+    const subscriptionSchedule = await stripe.subscriptionSchedules.create({
+      customer: customers[0].id,
+      start_date: start_date,
+      end_behavior: "release",
+      phases: [
+        {
+          items: [
+            {
+              price: price3.id,
+              quantity: 1,
+            },
+          ],
+          iterations: 5,
+        },
+      ],
+    });
+    return subscriptionSchedule;
+  })
+  .patch("/schedule/futur", async () => {
+    const customer = await stripe.customers.search({
+      query: `email:'kevin.experience0014@example.com'`,
+    });
+    const { data: subscriptionSchedules } =
+      await stripe.subscriptionSchedules.list({
+        customer: customer.id,
+      });
+    const subscriptionSchedulesNotStarted = subscriptionSchedules.find(
+      (s: { status: string }) => s.status === "not_started"
+    );
+
+    const now = Date.now();
+    const new_week = new Date(now + 7 * 24 * 60 * 60 * 1000);
+    const subscriptionSchedule = await stripe.subscriptionSchedules.update(
+      subscriptionSchedulesNotStarted.id,
+      {
+        phases: [
+          {
+            items: [
+              {
+                price: subscriptionSchedulesNotStarted.phases[0].items[0].price,
+              },
+            ],
+            start_date: new_week,
+          },
+        ],
+      }
+    );
+    return subscriptionSchedule;
+  })
+  .delete("/schedule/futur", async () => {
+    const customer = await stripe.customers.search({
+      query: `email:'kevin.experience0014@example.com'`,
+    });
+    const { data: subscriptionSchedules } =
+      await stripe.subscriptionSchedules.list({
+        customer: customer.id,
+      });
+    const subscriptionSchedulesNotStarted = subscriptionSchedules.find(
+      (s: { status: string }) => s.status === "not_started"
+    );
+    const subscriptionSchedule = await stripe.subscriptionSchedules.cancel(
+      subscriptionSchedulesNotStarted.id
+    );
+    return subscriptionSchedule;
+  })
   .get("/list", async () => {
     const customer = await stripe.customers.search({
       query: `email:'kevin.experience0014@example.com'`,
@@ -67,7 +190,7 @@ export const experience = new Elysia({
     });
     return subscriptions;
   })
-  .post("/add/item", async () => {
+  .put("/item", async () => {
     const customer = await stripe.customers.search({
       query: `email:'kevin.experience0014@example.com'`,
     });
@@ -92,7 +215,7 @@ export const experience = new Elysia({
     });
     return subscriptionItem;
   })
-  .post("/delete/item", async () => {
+  .delete("/item", async () => {
     const customer = await stripe.customers.search({
       query: `email:'kevin.experience0014@example.com'`,
     });

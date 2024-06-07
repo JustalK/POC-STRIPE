@@ -13,3 +13,6 @@
 - **Experience_0009**: Playing with the promotionnal code api
 - **Experience_0010**: Playing with the tax code and shipping rate
 - **Experience_0011**: Playing with the tax rate
+- **Experience_0012**: Playing with the paymentLink
+- **Experience_0013**: Playing with the quote
+- **Experience_0014**: Playing with the subscription and subscriptionItem

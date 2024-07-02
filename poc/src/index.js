@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import Experience_0001 from './experiences/Experience_0001';
-import Experience_0002 from './experiences/Experience_0002';
+import Experience0001 from './experiences/Experience_0001';
+import Experience0002 from './experiences/Experience_0002';
 import reportWebVitals from './reportWebVitals';
 import {
   createBrowserRouter,
@@ -12,11 +12,11 @@ import {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Experience_0001 />,
+    element: <Experience0001 />,
   },
   {
     path: "/0002",
-    element: <Experience_0002 />,
+    element: <Experience0002 />,
   },
 ]);
 
